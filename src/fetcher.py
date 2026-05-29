@@ -3,16 +3,8 @@ Layer 1: Data Fetcher
 
 All NHL API communication lives here. This module converts raw JSON
 responses into clean Python dataclasses (defined in models.py).
-No business logic — only data retrieval and normalization.
 
 NHL public API base URL: https://api-web.nhle.com
-No authentication required.
-
-Functions added as we build each step:
-  Step 1 → fetch_roster()
-  Step 2 → fetch_game_log()
-  Step 3 → fetch_all_game_logs()
-  Step 4 → summarize_player(), get_player_summaries()
 """
 
 import requests
@@ -38,8 +30,7 @@ def fetch_roster() -> list[Player]:
       "goalies":    [...]
     }
 
-    We flatten all three groups into a single list of Player objects.
-    Goalies are included here — they get filtered out later in the engine.
+    We put all three groups into a single list of Player objects.
     """
     url = f"{NHL_API_BASE}/v1/roster/{TEAM_CODE}/current"
     response = requests.get(url, timeout=10)
@@ -81,8 +72,7 @@ def fetch_game_log(player_id: int) -> list[GameStats]:
       ...
     }
 
-    Games the player didn't dress for are not included in the response.
-    Returns entries sorted oldest-to-newest so slicing [-N:] gives the last N games.
+    Returns entries sorted oldest-to-newest.
     """
     url = f"{NHL_API_BASE}/v1/player/{player_id}/game-log/now"
     response = requests.get(url, timeout=10)
@@ -117,15 +107,14 @@ def fetch_all_game_logs(players: list[Player]) -> dict[int, list[GameStats]]:
     Fetch game logs for every player on the roster.
 
     Returns a dict mapping player_id -> list[GameStats].
-    Players with no games this season (e.g. injured, just called up) get an
-    empty list rather than crashing the whole fetch.
+    Players with no games this season (e.g. injured, just called up) get an empty list.
     """
     logs: dict[int, list[GameStats]] = {}
     for player in players:
         try:
             logs[player.player_id] = fetch_game_log(player.player_id)
         except Exception as e:
-            # One bad response shouldn't abort the entire roster fetch.
+            # Raise a warning and continue the fetch if one player's log fails.
             print(f"  Warning: could not fetch log for {player.name} ({player.player_id}): {e}")
             logs[player.player_id] = []
     return logs
@@ -137,7 +126,7 @@ def summarize_player(player: Player, game_log: list[GameStats], n_games: int) ->
 
     game_log must be sorted oldest-to-newest (fetch_game_log guarantees this),
     so we take the tail to get the most recent N entries.
-    If fewer than N games exist we use all of them — no padding with zeros.
+    If fewer than N games exist we use all of them.
     """
     recent = game_log[-n_games:] if n_games > 0 else []
 
@@ -155,7 +144,7 @@ def get_player_summaries(n_games: int = 10) -> list[PlayerSummary]:
     Full pipeline: roster → game logs → summaries.
 
     This is the main entry point for the engine layer.
-    Goalies are excluded here — they don't accumulate skater points.
+    Goalies are excluded here.
     """
     players = fetch_roster()
     logs = fetch_all_game_logs(players)

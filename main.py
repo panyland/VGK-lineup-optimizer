@@ -1,8 +1,5 @@
 """
-Entry point for the VGK Lineup Optimizer.
-
-Run:  python main.py
-Or for dev with auto-reload:  uvicorn src.api:app --reload --port 8000
+Entry point for the project. We use uvicorn web server to run the FastAPI app defined in src/api.py.
 
 API docs auto-generated at: http://localhost:8000/docs
 """

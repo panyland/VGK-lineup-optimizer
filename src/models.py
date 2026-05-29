@@ -1,13 +1,7 @@
 """
-Data models for the VGK lineup optimizer.
+Data models/classes for the lineup optimizer.
 
-We use Python dataclasses — lightweight, no external dependencies,
-and they give us free __repr__ for debugging.
-
-Models are added here as we build each step:
-  Step 1 → Player
-  Step 2 → GameStats
-  Step 4 → PlayerSummary
+We use Python dataclasses for simplicity.
 """
 
 from dataclasses import dataclass
@@ -15,9 +9,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Player:
-    player_id: int      # NHL API player ID — stable across seasons
+    """Basic info about a player."""
+    player_id: int      # NHL API player ID
     name: str           # Full name, e.g. "Jack Eichel"
-    position: str       # "C", "L", "R", "D", or "G" (goalie)
+    position: str       # "C", "L", "R", "D", or "G" (center, left wing, right wing, defense, goalie)
     jersey_number: int
 
 
@@ -35,7 +30,7 @@ class GameStats:
 
 @dataclass
 class PlayerSummary:
-    """A player's stats aggregated over the last N games. This is what the engine works with."""
+    """A player's stats aggregated over the last N games. This is what we work with."""
     player: Player
     games_played: int
     total_even_strength_points: int

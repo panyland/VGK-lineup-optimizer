@@ -4,10 +4,10 @@ REST API that recommends optimal Vegas Golden Knights line combinations based on
 
 ---
 
-## Quick start
+## Quick start guide
 
 ```bash
-git clone <repo>
+tar -xzf vgk-lineup-optimizer.tgz
 cd vgk-lineup-optimizer
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
@@ -58,13 +58,13 @@ Three layers, each independently testable:
 GET /lineup
     │
     ▼
-[Layer 3] api.py        — validates input, calls the pipeline, returns JSON
+[Layer 3] api.py        — calls the pipeline and returns JSON
     │
     ▼
-[Layer 2] engine.py     — ranks players by situation-specific points, fills lineup slots
+[Layer 2] engine.py     — ranks players by situation-specific points
     │
     ▼
-[Layer 1] fetcher.py    — fetches roster + game logs from the NHL API, normalizes JSON
+[Layer 1] fetcher.py    — fetches roster and game logs from the NHL API
 ```
 
 ### Data source
@@ -90,8 +90,6 @@ The `games` parameter controls the lookback window. With `games=10`, only each p
 2. Sort each group by the situation's point total, descending.
 3. Fill slots top-down: best 3 forwards → line 1, next 3 → line 2, etc.
 
-This is intentionally simple — it ignores handedness and line chemistry.
-
 ---
 
 ## Project structure
@@ -107,10 +105,3 @@ This is intentionally simple — it ignores handedness and line chemistry.
 ```
 
 ---
-
-## Running tests
-
-```bash
-pip install pytest
-pytest tests/
-```

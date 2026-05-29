@@ -1,35 +1,31 @@
 """
 Layer 2: Lineup Engine
 
-Pure Python — no network calls, no I/O. Takes a list of PlayerSummary
-objects and returns optimal lineup structures as plain dicts.
+Takes a list of PlayerSummary objects and returns optimal lineup structures as dicts.
 
 Lineup rules:
   Even strength (5v5): 3 forward lines of 3 + 3 defense pairs of 2
   Power play (5v4):    1 unit — 3 forwards + 2 defensemen
   Penalty kill (4v5):  1 unit — 2 forwards + 2 defensemen
 
-Algorithm (v1 — intentionally naive):
+Algorithm:
   1. Split players into forwards (C/L/R) and defensemen (D).
-  2. Sort each group by the situation-relevant point total, descending.
-  3. Fill slots top-down: best players go to line/pair 1, next to line/pair 2, etc.
-
-This ignores handedness, line chemistry, and within-group positional
-constraints (e.g. C vs wing). That's fine for v1 — easy to layer in later.
+  2. Sort each group by the situation specific point total in descending order.
+  3. Fill slots top-down: best players go to line 1/pair 1, next to line 2/pair 2, etc.
 """
 
 from .models import PlayerSummary
 
 
 def _split(summaries: list[PlayerSummary]) -> tuple[list[PlayerSummary], list[PlayerSummary]]:
-    """Separate skaters into forwards (C/L/R) and defensemen (D)."""
+    """Separate players into forwards (C/L/R) and defensemen (D)."""
     forwards   = [s for s in summaries if s.player.position in ("C", "L", "R")]
     defensemen = [s for s in summaries if s.player.position == "D"]
     return forwards, defensemen
 
 
 def _fmt(s: PlayerSummary, points_key: str, points_value: int) -> dict:
-    """Serialize a PlayerSummary to a JSON-friendly dict for one situation."""
+    """Format a PlayerSummary to a JSON-friendly dict for one situation."""
     return {
         "name": s.player.name,
         "position": s.player.position,
@@ -71,7 +67,7 @@ def build_even_strength_lineup(summaries: list[PlayerSummary]) -> dict:
 def build_power_play_lineup(summaries: list[PlayerSummary]) -> dict:
     """
     5v4 lineup: top 3 forwards + top 2 defensemen by power-play points.
-    Single unit only (v1 doesn't build a PP2).
+    Single unit only.
     """
     forwards, defensemen = _split(summaries)
     forwards.sort(key=lambda s: s.total_power_play_points, reverse=True)
@@ -110,7 +106,7 @@ def build_penalty_kill_lineup(summaries: list[PlayerSummary]) -> dict:
 
 def build_lineup(summaries: list[PlayerSummary], situation: str) -> dict:
     """
-    Dispatch to the correct builder based on situation code.
+    Use correct function based on situation.
       "es" → even strength
       "pp" → power play
       "sh" → shorthanded / penalty kill

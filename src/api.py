@@ -1,22 +1,17 @@
 """
 Layer 3: REST API
 
-Thin FastAPI wrapper around the fetcher and engine. Validates inputs,
-calls the pipeline, and returns JSON. No business logic lives here.
+FastAPI wrapper around the fetcher and engine. Validates inputs,
+calls the pipeline, and returns JSON.
 
 Endpoints:
-  GET /lineup?situation={es|pp|sh}&games={N}  → optimal lineup
+  GET /lineup?situation={es|pp|sh}&games={N}   → optimal lineup
   GET /roster                                  → full VGK roster
   GET /live/status                             → live polling status (added Step 7)
-
-Start with:  python main.py
-Or:          uvicorn src.api:app --reload
 """
 
 from typing import Annotated
-
 from fastapi import FastAPI, HTTPException, Query
-
 from .fetcher import fetch_roster, get_player_summaries
 from .engine import build_lineup
 
@@ -36,9 +31,6 @@ def get_lineup(
     """
     Return the optimal VGK lineup for the given situation.
 
-    Fetches fresh data from the NHL API on every call — no caching in v1.
-    Each call makes ~32 HTTP requests (1 roster + 31 game logs), so expect
-    a few seconds of latency. Caching is a natural next step.
     """
     if situation not in ("es", "pp", "sh"):
         raise HTTPException(status_code=422, detail="situation must be one of: es, pp, sh")
@@ -55,7 +47,10 @@ def get_lineup(
 
 @app.get("/roster")
 def get_roster():
-    """Return the full current VGK roster."""
+    """
+    Return the full current VGK roster.
+    
+    """
     players = fetch_roster()
     return {
         "team": "VGK",
