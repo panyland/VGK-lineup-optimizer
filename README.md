@@ -7,8 +7,8 @@ REST API that recommends optimal Vegas Golden Knights line combinations based on
 ## Quick start guide
 
 ```bash
-tar -xzf vgk-lineup-optimizer.tgz
-cd vgk-lineup-optimizer
+tar -xzf VGK-lineup-optimizer.tgz
+cd VGK-lineup-optimizer
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 python main.py
