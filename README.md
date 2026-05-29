@@ -14,7 +14,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Server runs at `http://localhost:8000`. Interactive docs at `http://localhost:8000/docs`.
+Open interactive docs in browser at `http://localhost:8000/docs`.
 
 ---
 
